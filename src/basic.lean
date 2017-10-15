@@ -1,5 +1,5 @@
 import init.algebra.ring
-import .sia
+import .core
 
 variable (R : Type)
 variable [sia R]
