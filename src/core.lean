@@ -29,5 +29,5 @@ class sia R extends field R, strict_order R :=
 (ne_distinguishable :     forall a b : R, ne a b -> a < b \/ b < a)
 -- Axiom 3
 (exists_unique_sqrt :     forall a : R, exists! b, b * b = a)
--- Axiom 4
-(kock_lawvere :           forall f: Delta -> R, forall d: Delta, exists! a: R, f d = f 0 + a * d.val)
+-- Axiom 4 : principle of microaffineness
+(kock_lawvere :           forall f: Delta -> R, exists! a: R, forall d: Delta, f d = f 0 + a * d.val)
