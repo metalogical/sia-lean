@@ -1,8 +1,8 @@
 prelude
 import init.algebra.field
-import init.algebra.order
 import init.logic
 import init.core
+import .order
 universe u
 
 notation `exists!` binders `, ` r:(scoped P, exists_unique P) := r
@@ -26,7 +26,6 @@ class sia R extends field R, strict_order R :=
 (zero_lt_one :            0 < 1)
 (add_lt_add_left :        forall a b : R, a < b -> forall c : R, c + a < c + b)
 (mul_lt_mul_of_pos_left : forall a b c : R, a < b -> 0 < c -> c * a < c * b)
-(ne_distinguishable :     forall a b : R, ne a b -> a < b \/ b < a)
 -- Axiom 3
 (exists_unique_sqrt :     forall a : R, exists! b, b * b = a)
 -- Axiom 4 : principle of microaffineness

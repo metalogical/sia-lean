@@ -5,7 +5,7 @@ variable (R : Type)
 variable [sia R]
 
 theorem microcancellation : forall a b: R, (forall d: Delta, a * d.val = b * d.val) -> a = b :=
-    take a b,
+    assume a b,
     assume ea_eq_eb : forall d: Delta, a * d.val = b * d.val,
     let f (d : Delta) : R := a * d.val in 
     begin
