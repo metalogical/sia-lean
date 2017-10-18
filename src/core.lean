@@ -44,6 +44,6 @@ section -- intervals
     definition open_interval (a: R) (b: R) : Type u := { r: R // a < r /\ r < b }
     definition closed_interval (a: R) (b: R) : Type u := { r: R // a <= r /\ r <= b }
 
-    notation `int[` a `,` b `]` := open_interval a b
-    notation `int(` a `,` b `(` := closed_interval a b
+    notation `[` a `...` b `]` := open_interval a b
+    notation `[(` a `...` b `)]` := closed_interval a b
 end
