@@ -25,9 +25,9 @@ end
 
 -- Smooth Infinitesimal Analysis
 class sia R extends field R, strict_order R :=
-    (zero_lt_one :            0 < 1)
-    (add_lt_add_left :        forall a b : R, a < b -> forall c : R, c + a < c + b)
-    (mul_lt_mul_of_pos_left : forall a b c : R, a < b -> 0 < c -> c * a < c * b)
+    (zero_lt_one :            (0: R) < (1: R))
+    (add_lt_add_left :        forall {a b : R}, a < b -> forall c : R, c + a < c + b)
+    (mul_lt_mul_of_pos_left : forall {a b c : R}, a < b -> 0 < c -> c * a < c * b)
     (exists_unique_sqrt :     forall a : { r: R // r > 0 }, exists! b, b * b = a.val)
     (kock_lawvere :           forall f: Delta -> R, exists! a: R, forall d: Delta, f d = f 0 + a * d.val)
 

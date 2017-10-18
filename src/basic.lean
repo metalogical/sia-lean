@@ -2,7 +2,7 @@ import init.algebra.ring
 import init.algebra.group
 import .core
 
-variable (R : Type)
+variable {R : Type}
 variable [sia R]
 
 theorem microcancellation : forall a b: R, (forall d: Delta, a * d.val = b * d.val) -> a = b :=
