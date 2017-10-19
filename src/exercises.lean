@@ -65,40 +65,34 @@ example : forall {a b: R}, a < b -> forall x: R, a < x \/ x < b := -- 1.2
     assume a_lt_b,
     assume x,
 
-    have b_minus_a_pos: 0 < b - a, from (calc
-        0   = -a + a  : by rw add_left_neg
-        ... < -a + b  : sia.add_lt_add_left a_lt_b _
-        ... =  b + -a : by rw add_comm
-        ... = b - a   : by rw sub_eq_add_neg),
-    have b_minus_a_not_zero: ne (b - a) 0, from
-        assume almost_bad: b - a = 0,
-        have bad: (0: R) < 0, from (calc
-            0   < b - a : b_minus_a_pos
-            ... = 0     : by rw almost_bad),
-        strict_order.lt_irrefl (0: R) bad,
+    -- shift x by [a ... b] -> [0 ... 1]
+    let delta: R := b - a in
+    let y: R := (x - a) / delta in
 
-    let y: R := (x - a) / (b - a) in
+    have delta_pos : 0 < b - a, from (calc
+        0   = -a + a : by rw add_left_neg
+        ... < -a + b : sia.add_lt_add_left a_lt_b _
+        ... =  b - a : by rw [add_comm, sub_eq_add_neg]
+    ),
+    have delta_ne_zero : ne (b - a) 0, from ne.symm (lt_ne delta_pos),
+
     have almost: 0 < y \/ y < 1, from sia.zero_one_far y,
     have left: 0 < y -> a < x \/ x < b, from
-        assume y_pos,
-        or.intro_left _ (calc
-            a   = a + (b - a) * 0 : by rw [mul_zero, add_zero a]
-            ... < a + (b - a) * y : sia.add_lt_add_left (sia.mul_lt_mul_of_pos_left y_pos b_minus_a_pos) _
-
-            ... = a + (b - a) * ((x - a) / (b - a))     : by reflexivity
-            ... = a + (b - a) * (inv (b - a) * (x - a)) : by rw [mul_comm (inv (b - a)) (x - a), division_def]
-            ... = a + (b - a) * inv (b - a) * (x - a)   : by rw mul_assoc
-
-            ... = a + 1 * (x - a) : by rw mul_inv_cancel b_minus_a_not_zero
-            ... = x               : by rw [one_mul, add_comm, sub_add_cancel]),
+        assume y_pos : 0 < y,
+        or.intro_left _ (calc -- show a < x
+            a   = a + delta * 0               : by rw [mul_zero, add_zero a]
+            ... < a + delta * y               : sia.add_lt_add_left (sia.mul_lt_mul_of_pos_left y_pos delta_pos) _
+            ... = a + (x - a) / delta * delta : by rw mul_comm
+            ... = a + (x - a)                 : by rw div_mul_cancel _ delta_ne_zero
+            ... = x                           : by rw [add_comm, sub_add_cancel]
+        ),
     have right: y < 1 -> a < x \/ x < b, from
-        assume y_lt_one,
-        or.intro_right _ (calc
-            x   = x - a + a       : by rw sub_add_cancel
-            ... = y * (b - a) + a : by rw div_mul_cancel _ b_minus_a_not_zero
-            ... = a + (b - a) * y : by rw [add_comm, mul_comm]
-            ... < a + (b - a) * 1 : sia.add_lt_add_left (sia.mul_lt_mul_of_pos_left y_lt_one b_minus_a_pos) _
-            ... = a + b - a       : by rw [mul_one, add_sub_assoc]
-            ... = -a + a + b      : by rw [sub_eq_add_neg, add_comm, add_assoc]
-            ... = b               : by rw [add_left_neg, zero_add]),
+        assume y_lt_one: y < 1,
+        or.intro_right _ (calc -- show x < b
+            x   = (x - a) + a   : by rw sub_add_cancel
+            ... = a + delta * y : by rw [mul_comm, add_comm, div_mul_cancel _ delta_ne_zero]
+            ... < a + delta * 1 : sia.add_lt_add_left (sia.mul_lt_mul_of_pos_left y_lt_one delta_pos) _
+            ... = a + b - a     : by rw [mul_one, add_sub_assoc]
+            ... = b             : by rw [sub_eq_add_neg, add_comm, neg_add_cancel_left]
+        ),
     or.elim almost left right

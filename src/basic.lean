@@ -26,6 +26,15 @@ section -- useful lemmas
             ... = -a + (-b + b) : by rw add_assoc
             ... = -a + 0        : by rw add_left_neg
             ... = -a            : by rw add_zero
+
+    lemma lt_ne : forall {a b : R}, a < b -> ne a b :=
+        assume a b,
+        assume a_lt_b,
+        assume bad_a_eq_b: a = b,
+        strict_order.lt_irrefl a (calc
+            a   < b : a_lt_b
+            ... = a : by rw bad_a_eq_b
+        )
 end
 
 theorem microcancellation : forall a b: R, (forall d: Delta, a * d.val = b * d.val) -> a = b :=
