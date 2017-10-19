@@ -1,7 +1,5 @@
 prelude
 import init.algebra.field
-import init.logic
-import init.core
 universe u
 
 notation `exists!` binders `, ` r:(scoped P, exists_unique P) := r
@@ -32,7 +30,7 @@ attribute [trans] strict_order.lt_trans -- allow use of transitivity in calc pro
 
 -- Smooth Infinitesimal Analysis
 class sia R extends field R, strict_order R :=
-    (zero_lt_one :            (0: R) < (1: R))
+    (zero_one_far :           forall a: R, 0 < a \/ a < 1)
     (add_lt_add_left :        forall {a b : R}, a < b -> forall c : R, c + a < c + b)
     (mul_lt_mul_of_pos_left : forall {a b c : R}, a < b -> 0 < c -> c * a < c * b)
     (exists_unique_sqrt :     forall a : { r: R // r > 0 }, exists! b, b * b = a.val)
@@ -46,4 +44,11 @@ section -- intervals
 
     notation `[` a `...` b `]` := open_interval a b
     notation `[(` a `...` b `)]` := closed_interval a b
+end
+
+section
+    variable [sia R]
+
+    @[reducible]
+    def inv : R -> R := has_inv.inv
 end
