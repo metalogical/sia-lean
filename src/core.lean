@@ -43,11 +43,3 @@ section -- intervals
     notation `[` a `...` b `]` := open_interval a b
     notation `[[` a `...` b `]]` := closed_interval a b
 end
-
-section
-    variable [sia R]
-
-    -- non-unicode notation for inverse
-    @[simp, reducible]
-    def inv : R -> R := has_inv.inv
-end
