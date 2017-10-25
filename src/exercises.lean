@@ -69,3 +69,48 @@ example : forall {a b: R}, not (a < b) -> [a ... b] -> false := -- 1.3; i.e. [a 
     not_a_lt_b (lt_trans (and.elim_left bad) (and.elim_right bad))
 
 -- 1.4 in basic.lean
+
+section
+    @[reducible]
+    def convex_comb (x y : R) (t : [[(0: R) ... 1]]) := t.val * y + (1 - t.val) * x
+
+    example : forall a b : R, forall x y : [[a ... b]], forall t : [[0 ... 1]],
+                a <= convex_comb x.val y.val t /\ convex_comb x.val y.val t <= b :=
+        assume a b,
+        assume x y,
+        assume t,
+        have t_nonneg: 0 <= t.val, from and.elim_left t.property,
+
+        have t.val <= 1, from and.elim_right t.property,
+        have t_nonneg': 0 <= (1 - t.val), from (calc
+            0   = 1 + -1       : by rw add_neg_self
+            ... <= 1 + - t.val : sia.le_add_left (sia.le_neg_flip this)
+            ... = 1 - t.val    : by rw <-sub_eq_add_neg
+        ),
+
+        have left: a <= convex_comb x.val y.val t, from
+            have x_ineq: a <= x.val, from and.elim_left x.property,
+            have y_ineq: a <= y.val, from and.elim_left y.property,
+            (calc
+                a   = 1 * a + (- (t.val * a) + t.val * a)  : by rw [<-add_comm (t.val * a) _, <-sub_eq_add_neg, sub_self, add_zero, one_mul]
+                ... = 1 * a + -(t.val) * a + t.val * a     : by rw [add_assoc, neg_mul_eq_neg_mul]
+                ... = (1 - t.val) * a + t.val * a          : by rw [sub_eq_add_neg, <-right_distrib]
+                ... <= (1 - t.val) * a + t.val * y.val     : sia.le_add_left (sia.le_mul_pos_left y_ineq t_nonneg)
+                ... = t.val * y.val + (1 - t.val) * a      : by rw add_comm
+                ... <= t.val * y.val + (1 - t.val) * x.val : sia.le_add_left (sia.le_mul_pos_left x_ineq t_nonneg')
+            ),
+        have right: convex_comb x.val y.val t <= b, from
+            have x_ineq: x.val <= b, from and.elim_right x.property,
+            have y_ineq: y.val <= b, from and.elim_right y.property,
+            (calc
+                t.val * y.val + (1 - t.val) * x.val
+                    <= t.val * y.val + (1 - t.val) * b    : sia.le_add_left (sia.le_mul_pos_left x_ineq t_nonneg')
+                ... = (1 - t.val) * b + t.val * y.val     : by rw add_comm
+                ... <= (1 - t.val) * b + t.val * b        : sia.le_add_left (sia.le_mul_pos_left y_ineq t_nonneg)
+                ... = 1 * b + -(t.val) * b + t.val * b    : by rw [sub_eq_add_neg, right_distrib]
+                ... = 1 * b + (- (t.val * b) + t.val * b) : by rw [add_assoc, neg_mul_eq_neg_mul]
+                ... = b - (t.val * b) + t.val * b         : by rw [one_mul, sub_eq_add_neg, add_assoc]
+                ... = b                                   : by rw sub_add_cancel
+            ),
+        and.intro left right
+end

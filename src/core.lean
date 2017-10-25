@@ -4,7 +4,6 @@ universe u
 
 notation `exists!` binders `, ` r:(scoped P, exists_unique P) := r
 
-
 variable {R : Type u}
 
 section -- microneighborhoods

@@ -151,6 +151,19 @@ namespace sia
             or.elim this zero_le_c right
     end
 
+    lemma le_neg_flip : a <= b -> -b <= -a := begin
+        simp [le_def] at *,
+        exact
+            assume a_le_b,
+            assume neg_a_lt_neg_b,
+            have b < a, from (calc
+                b = - - b   : by rw neg_neg
+                ... < - - a : lt_neg_flip neg_a_lt_neg_b
+                ... = a     : by rw neg_neg
+            ),
+            absurd this a_le_b
+    end
+
     -- General Theorems
 
     theorem microcancellation : forall a b: R, (forall d: Delta, a * d.val = b * d.val) -> a = b :=
