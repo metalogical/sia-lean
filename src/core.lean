@@ -1,5 +1,6 @@
 prelude
 import init.algebra.field
+import init.data.set
 universe u
 
 notation `exists!` binders `, ` r:(scoped P, exists_unique P) := r
@@ -17,6 +18,8 @@ section -- microneighborhoods
 
     @[reducible]
     instance : has_zero Delta := (| { val := (0 : R), property := ring.mul_zero (0 : R) } |)
+
+    definition microstable (A : set R) : Prop := forall a : subtype A, forall d : Delta, A ((a : R) + d.val)
 end
 
 -- Smooth Infinitesimal Analysis
