@@ -19,7 +19,7 @@ section -- microneighborhoods
     @[reducible]
     instance : has_zero Delta := (| { val := (0 : R), property := ring.mul_zero (0 : R) } |)
 
-    definition microstable (A : set R) : Prop := forall a : subtype A, forall d : Delta, A ((a : R) + d.val)
+    definition microstable (A : set R) : Prop := forall a : subtype A, forall d : Delta, set.mem (a.val + d.val) A
 end
 
 -- Smooth Infinitesimal Analysis
