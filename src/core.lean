@@ -11,15 +11,16 @@ section -- microneighborhoods
     variable [ring R]
 
     @[reducible]
-    definition microneighborhood (around : R) : Type u := { r: R // r * r = around }
+    protected definition microneighborhood (around : R) : Type u := { r: R // r * r = around }
 
     @[reducible]
-    def Delta : Type u := microneighborhood (0 : R)
+    private def Delta : Type u := microneighborhood (0 : R)
 
     @[reducible]
-    instance : has_zero Delta := (| { val := (0 : R), property := ring.mul_zero (0 : R) } |)
+    private def zero_Delta : has_zero Delta := (| { val := (0 : R), property := ring.mul_zero (0 : R) } |)
 
-    definition microstable (A : set R) : Prop := forall a : subtype A, forall d : Delta, set.mem (a.val + d.val) A
+    @[reducible]
+    private def microstable (A : set R) : Prop := forall a : subtype A, forall d : Delta, set.mem (a.val + d.val) A
 end
 
 -- Smooth Infinitesimal Analysis
@@ -33,10 +34,10 @@ class sia R extends field R, has_lt R, has_le R :=
     (lt_add_left        : forall {a b : R}, a < b -> forall c : R, c + a < c + b)
     (lt_mul_pos_left    : forall {a b c : R}, a < b -> 0 < c -> c * a < c * b)
     (exists_unique_sqrt : forall a : { r: R // r > 0 }, exists! b, b * b = a.val)
-    (kock_lawvere       : forall f: Delta -> R, exists! a: R, forall d: Delta, f d = f 0 + a * d.val)
+    (kock_lawvere       : forall f: Delta -> R, exists! a: R, forall d: Delta, f d = f zero_Delta.zero + a * d.val)
 attribute [trans] sia.lt_trans -- allow use of transitivity in calc proofs
 
-section -- intervals
+namespace sia -- intervals
     variable [sia R]
 
     definition open_interval (a: R) (b: R) : Type u := { r: R // a < r /\ r < b }
@@ -44,4 +45,14 @@ section -- intervals
 
     notation `[` a `...` b `]` := open_interval a b
     notation `[[` a `...` b `]]` := closed_interval a b
-end
+
+    -- redefine these, but parameterized by [sia R], rather than [ring R]
+    @[reducible]
+    def microneighborhood : R -> Type u := microneighborhood
+    @[reducible]
+    def Delta : Type u := microneighborhood (0 : R)
+    @[reducible]
+    def microstable : set R -> Prop := microstable
+
+    instance : has_zero Delta := (| { val := (0 : R), property := ring.mul_zero (0 : R) } |)
+end sia
