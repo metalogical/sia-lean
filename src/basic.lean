@@ -166,10 +166,10 @@ namespace sia
 
     -- General Theorems
 
-    theorem microcancellation : forall a b: R, (forall d: Delta, a * d.val = b * d.val) -> a = b :=
+    theorem microcancellation : forall a b: R, (forall d: subtype Delta, a * d.val = b * d.val) -> a = b :=
         assume a b,
-        assume ea_eq_eb : forall d: Delta, a * d.val = b * d.val,
-        let f (d : Delta) : R := a * d.val in 
+        assume ea_eq_eb : forall d: subtype Delta, a * d.val = b * d.val,
+        let f (d : subtype Delta) : R := a * d.val in 
         begin
             apply (unique_of_exists_unique (kock_lawvere f)),
             show forall d, f d = a * 0 + a * d.val,
@@ -182,13 +182,13 @@ namespace sia
                 reflexivity,
         end
 
-    theorem microaffinity : forall f: R -> R, forall x: R, exists! a: R, forall d: Delta, f (x + d.val) = f x + a * d.val :=
+    theorem microaffinity : forall f: R -> R, forall x: R, exists! a: R, forall d: subtype Delta, f (x + d.val) = f x + a * d.val :=
         assume f: R -> R,
         assume x: R,
-        let g (d: Delta) : R := f (x + d.val) in
+        let g (d: subtype Delta) : R := f (x + d.val) in
         have nice: f x = g 0, from eq.symm (eq.subst (add_group.add_zero x) (eq.refl _)),
         begin
-            show exists! a: R, forall d: Delta, g d = f x + a * d.val,
+            show exists! a: R, forall d: subtype Delta, g d = f x + a * d.val,
             rewrite nice,
             apply kock_lawvere,
         end

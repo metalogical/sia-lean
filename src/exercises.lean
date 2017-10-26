@@ -116,8 +116,8 @@ section --1.5
 end
 
 section -- 1.6
-    example : forall d: Delta, not (d.val < (0: R) \/ 0 < d.val) :=
-        assume d: Delta,
+    example : forall d: subtype Delta, not (d.val < (0: R) \/ 0 < d.val) :=
+        assume d: subtype Delta,
         assume bad,
         have nonzero: ne d.val 0, from or.elim bad sia.lt_ne (fun pos, ne.symm (sia.lt_ne pos)),
         have ne (d.val * d.val) 0, from
