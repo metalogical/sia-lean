@@ -32,7 +32,7 @@ class sia R extends field R, has_lt R, has_le R :=
 
     (zero_one_far       : forall a: R, 0 < a \/ a < 1)
     (lt_add_left        : forall {a b : R}, a < b -> forall c : R, c + a < c + b)
-    (lt_mul_pos_left    : forall {a b c : R}, a < b -> 0 < c -> c * a < c * b)
+    (lt_mul_pos_left    : forall {a b c : R}, 0 < c -> a < b -> c * a < c * b)
     (exists_unique_sqrt : forall a : { r: R // r > 0 }, exists! b, b * b = a.val)
     (kock_lawvere       : forall f: subtype Delta -> R, exists! a: R, forall d: subtype Delta, f d = f zero_Delta.zero + a * d.val)
 attribute [trans] sia.lt_trans -- allow use of transitivity in calc proofs

@@ -58,7 +58,7 @@ namespace sia
             assume y_pos : 0 < y,
             or.intro_left _ (calc -- show a < x
                 a   = a + delta * 0               : by rw [mul_zero, add_zero a]
-                ... < a + delta * y               : lt_add_left (lt_mul_pos_left y_pos delta_pos) _
+                ... < a + delta * y               : lt_add_left (lt_mul_pos_left delta_pos y_pos) _
                 ... = a + (x - a) / delta * delta : by rw mul_comm
                 ... = a + (x - a)                 : by rw div_mul_cancel _ delta_ne_zero
                 ... = x                           : by rw [add_comm, sub_add_cancel]
@@ -68,7 +68,7 @@ namespace sia
             or.intro_right _ (calc -- show x < b
                 x   = (x - a) + a   : by rw sub_add_cancel
                 ... = a + delta * y : by rw [mul_comm, add_comm, div_mul_cancel _ delta_ne_zero]
-                ... < a + delta * 1 : lt_add_left (lt_mul_pos_left y_lt_one delta_pos) _
+                ... < a + delta * 1 : lt_add_left (lt_mul_pos_left delta_pos y_lt_one) _
                 ... = a + b - a     : by rw [mul_one, add_sub_assoc]
                 ... = b             : by rw [sub_eq_add_neg, add_comm, neg_add_cancel_left]
             ),
@@ -86,7 +86,7 @@ namespace sia
             assume one_div_c_neg,
             have (1: R) < 1, from (calc
                 1   = c * (1 / c) : by rw mul_div_cancel' _ c_ne_zero
-                ... < c * 0       : lt_mul_pos_left one_div_c_neg c_pos
+                ... < c * 0       : lt_mul_pos_left c_pos one_div_c_neg
                 ... = 0           : mul_zero _
                 ... < (1: R)      : lt_zero_one
             ),
@@ -143,7 +143,7 @@ namespace sia
                 have b < a, from (calc
                     b   = (1 / c) * c * b   : by rw [one_div_mul_cancel c_ne_zero, one_mul]
                     ... = (1 / c) * (b * c) : by simp [mul_comm, mul_assoc]
-                    ... < (1 / c) * (a * c) : lt_mul_pos_left bc_lt_ac (one_div_pos_of_pos c_pos)
+                    ... < (1 / c) * (a * c) : lt_mul_pos_left (one_div_pos_of_pos c_pos) bc_lt_ac
                     ... = (1 / c) * c * a   : by simp [mul_comm, mul_assoc]
                     ... = a                 : by rw [one_div_mul_cancel c_ne_zero, one_mul]
                 ),
@@ -163,6 +163,38 @@ namespace sia
             ),
             absurd this a_le_b
     end
+
+    @[trans]
+    lemma le_lt_trans : a <= b -> b < c -> a < c :=
+        assume le,
+        assume lt,
+        have le: not (b < a), from iff.elim_left (le_def R) le,
+        have ne a c, from
+            assume bad,
+            have b < a, by {rw bad, assumption},
+            le this,
+        have a < c \/ c < a, from sia.ne_lt this,
+        have right_bad : not (c < a), from
+            assume bad,
+            have b < a, from sia.lt_trans lt bad,
+            le this,
+        or.resolve_right this right_bad
+
+    @[trans]
+    lemma lt_le_trans : a < b -> b <= c -> a < c :=
+        assume lt,
+        assume le,
+        have le: not (c < b), from iff.elim_left (le_def R) le,
+        have ne a c, from
+            assume bad,
+            have c < b, by {rw <-bad, assumption},
+            le this,
+        have a < c \/ c < a, from sia.ne_lt this,
+        have right_bad : not (c < a), from
+            assume bad,
+            have c < b, from sia.lt_trans bad lt,
+            le this,
+        or.resolve_right this right_bad
 
     -- General Theorems
 

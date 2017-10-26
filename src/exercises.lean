@@ -116,18 +116,42 @@ section --1.5
 end
 
 section -- 1.6
+    lemma delta_close_to_zero : forall d: subtype Delta, (0: R) <= d.val /\ d.val <= 0 :=
+        assume d,
+        have left: not (d.val < 0), from
+            assume bad,
+            have 0 < -d.val, by {rw <-neg_zero, apply sia.lt_neg_flip bad},
+            have 0 < d.val * d.val, by {rw <-neg_mul_neg, rw <-mul_zero, apply lt_mul_pos_left this, assumption},
+            absurd d.property (ne.symm (sia.lt_ne this)),
+        have right: not (0 < d.val), from
+            assume bad,
+            have 0 < d.val * d.val, by {rw <-mul_zero, apply sia.lt_mul_pos_left bad bad},
+            absurd d.property (ne.symm (sia.lt_ne this)),
+        have not (d.val < 0) /\ not (0 < d.val), from and.intro left right,
+        by {simp [sia.le_def] at *, assumption}
+
     example : forall d: subtype Delta, not (d.val < (0: R) \/ 0 < d.val) :=
-        assume d: subtype Delta,
-        assume bad,
-        have nonzero: ne d.val 0, from or.elim bad sia.lt_ne (fun pos, ne.symm (sia.lt_ne pos)),
-        have ne (d.val * d.val) 0, from
-            assume bad: d.val * d.val = 0,
-            have d.val = 0, from (calc
-                d.val = (1 / d.val) * d.val * d.val : by rw [one_div_mul_cancel nonzero, one_mul]
-                ...   = (1 / d.val) * (d.val * d.val) : by rw mul_assoc
-                ...   = (1 / d.val) * 0 : by rw bad
-                ...   = 0 : by rw mul_zero
-            ),
-            absurd this nonzero,
-        absurd d.property this
+        assume d,
+        have 0 <= d.val /\ d.val <= 0, from delta_close_to_zero d,
+        by {simp [sia.le_def] at *, exact not_or this.left this.right}
+
+    example : forall d: subtype Delta, forall a: R, Delta (d.val * a) :=
+        assume d,
+        assume a,
+        have d.val * d.val = 0, from d.property,
+        show (d.val * a) * (d.val * a) = 0, from calc
+            (d.val * a) * (d.val * a)
+                = d.val * d.val * a * a : by simp
+            ... = 0 * a * a             : by rw this
+            ... = 0                     : by simp [zero_mul]
+
+    example : forall d: subtype Delta, forall a: R, 0 < a -> 0 < a + d.val :=
+        assume d,
+        assume a,
+        assume a_pos,
+        calc
+            0   <= d.val    : and.elim_left (delta_close_to_zero d)
+            ... = d.val + 0 : by rw add_zero
+            ... < d.val + a : sia.lt_add_left a_pos _
+            ... = a + d.val : by rw add_comm
 end
