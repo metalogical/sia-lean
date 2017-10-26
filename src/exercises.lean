@@ -70,7 +70,7 @@ example : forall {a b: R}, not (a < b) -> [a ... b] -> false := -- 1.3; i.e. [a 
 
 -- 1.4 in basic.lean
 
-section
+section --1.5
     @[reducible]
     def convex_comb (x y : R) (t : [[(0: R) ... 1]]) := t.val * y + (1 - t.val) * x
 
@@ -113,4 +113,21 @@ section
                 ... = b                                   : by rw sub_add_cancel
             ),
         and.intro left right
+end
+
+section -- 1.6
+    example : forall d: Delta, not (d.val < (0: R) \/ 0 < d.val) :=
+        assume d: Delta,
+        assume bad,
+        have nonzero: ne d.val 0, from or.elim bad sia.lt_ne (fun pos, ne.symm (sia.lt_ne pos)),
+        have ne (d.val * d.val) 0, from
+            assume bad: d.val * d.val = 0,
+            have d.val = 0, from (calc
+                d.val = (1 / d.val) * d.val * d.val : by rw [one_div_mul_cancel nonzero, one_mul]
+                ...   = (1 / d.val) * (d.val * d.val) : by rw mul_assoc
+                ...   = (1 / d.val) * 0 : by rw bad
+                ...   = 0 : by rw mul_zero
+            ),
+            absurd this nonzero,
+        absurd d.property this
 end
