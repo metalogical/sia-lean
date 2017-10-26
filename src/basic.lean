@@ -173,10 +173,10 @@ namespace sia
             assume bad,
             have b < a, by {rw bad, assumption},
             le this,
-        have a < c \/ c < a, from sia.ne_lt this,
+        have a < c \/ c < a, from ne_lt this,
         have right_bad : not (c < a), from
             assume bad,
-            have b < a, from sia.lt_trans lt bad,
+            have b < a, from lt_trans lt bad,
             le this,
         or.resolve_right this right_bad
 
@@ -189,10 +189,10 @@ namespace sia
             assume bad,
             have c < b, by {rw <-bad, assumption},
             le this,
-        have a < c \/ c < a, from sia.ne_lt this,
+        have a < c \/ c < a, from ne_lt this,
         have right_bad : not (c < a), from
             assume bad,
-            have c < b, from sia.lt_trans bad lt,
+            have c < b, from lt_trans bad lt,
             le this,
         or.resolve_right this right_bad
 

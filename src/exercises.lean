@@ -84,7 +84,7 @@ section --1.5
         have t.val <= 1, from and.elim_right t.property,
         have t_nonneg': 0 <= (1 - t.val), from (calc
             0   = 1 + -1       : by rw add_neg_self
-            ... <= 1 + - t.val : sia.le_add_left (sia.le_neg_flip this)
+            ... <= 1 + - t.val : le_add_left (le_neg_flip this)
             ... = 1 - t.val    : by rw <-sub_eq_add_neg
         ),
 
@@ -95,18 +95,18 @@ section --1.5
                 a   = 1 * a + (- (t.val * a) + t.val * a)  : by rw [<-add_comm (t.val * a) _, <-sub_eq_add_neg, sub_self, add_zero, one_mul]
                 ... = 1 * a + -(t.val) * a + t.val * a     : by rw [add_assoc, neg_mul_eq_neg_mul]
                 ... = (1 - t.val) * a + t.val * a          : by rw [sub_eq_add_neg, <-right_distrib]
-                ... <= (1 - t.val) * a + t.val * y.val     : sia.le_add_left (sia.le_mul_pos_left y_ineq t_nonneg)
+                ... <= (1 - t.val) * a + t.val * y.val     : le_add_left (le_mul_pos_left y_ineq t_nonneg)
                 ... = t.val * y.val + (1 - t.val) * a      : by rw add_comm
-                ... <= t.val * y.val + (1 - t.val) * x.val : sia.le_add_left (sia.le_mul_pos_left x_ineq t_nonneg')
+                ... <= t.val * y.val + (1 - t.val) * x.val : le_add_left (le_mul_pos_left x_ineq t_nonneg')
             ),
         have right: convex_comb x.val y.val t <= b, from
             have x_ineq: x.val <= b, from and.elim_right x.property,
             have y_ineq: y.val <= b, from and.elim_right y.property,
             (calc
                 t.val * y.val + (1 - t.val) * x.val
-                    <= t.val * y.val + (1 - t.val) * b    : sia.le_add_left (sia.le_mul_pos_left x_ineq t_nonneg')
+                    <= t.val * y.val + (1 - t.val) * b    : le_add_left (le_mul_pos_left x_ineq t_nonneg')
                 ... = (1 - t.val) * b + t.val * y.val     : by rw add_comm
-                ... <= (1 - t.val) * b + t.val * b        : sia.le_add_left (sia.le_mul_pos_left y_ineq t_nonneg)
+                ... <= (1 - t.val) * b + t.val * b        : le_add_left (le_mul_pos_left y_ineq t_nonneg)
                 ... = 1 * b + -(t.val) * b + t.val * b    : by rw [sub_eq_add_neg, right_distrib]
                 ... = 1 * b + (- (t.val * b) + t.val * b) : by rw [add_assoc, neg_mul_eq_neg_mul]
                 ... = b - (t.val * b) + t.val * b         : by rw [one_mul, sub_eq_add_neg, add_assoc]
@@ -120,20 +120,20 @@ section -- 1.6
         assume d,
         have left: not (d.val < 0), from
             assume bad,
-            have 0 < -d.val, by {rw <-neg_zero, apply sia.lt_neg_flip bad},
+            have 0 < -d.val, by {rw <-neg_zero, apply lt_neg_flip bad},
             have 0 < d.val * d.val, by {rw <-neg_mul_neg, rw <-mul_zero, apply lt_mul_pos_left this, assumption},
-            absurd d.property (ne.symm (sia.lt_ne this)),
+            absurd d.property (ne.symm (lt_ne this)),
         have right: not (0 < d.val), from
             assume bad,
-            have 0 < d.val * d.val, by {rw <-mul_zero, apply sia.lt_mul_pos_left bad bad},
-            absurd d.property (ne.symm (sia.lt_ne this)),
+            have 0 < d.val * d.val, by {rw <-mul_zero, apply lt_mul_pos_left bad bad},
+            absurd d.property (ne.symm (lt_ne this)),
         have not (d.val < 0) /\ not (0 < d.val), from and.intro left right,
-        by {simp [sia.le_def] at *, assumption}
+        by {simp [le_def] at *, assumption}
 
     example : forall d: subtype Delta, not (d.val < (0: R) \/ 0 < d.val) :=
         assume d,
         have 0 <= d.val /\ d.val <= 0, from delta_close_to_zero d,
-        by {simp [sia.le_def] at *, exact not_or this.left this.right}
+        by {simp [le_def] at *, exact not_or this.left this.right}
 
     example : forall d: subtype Delta, forall a: R, Delta (d.val * a) :=
         assume d,
@@ -152,6 +152,6 @@ section -- 1.6
         calc
             0   <= d.val    : and.elim_left (delta_close_to_zero d)
             ... = d.val + 0 : by rw add_zero
-            ... < d.val + a : sia.lt_add_left a_pos _
+            ... < d.val + a : lt_add_left a_pos _
             ... = a + d.val : by rw add_comm
 end
