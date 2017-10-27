@@ -127,13 +127,12 @@ section -- 1.6
             assume bad,
             have 0 < d.val * d.val, by {rw <-mul_zero, apply lt_mul_pos_left bad bad},
             absurd d.property (ne.symm (lt_ne this)),
-        have not (d.val < 0) /\ not (0 < d.val), from and.intro left right,
-        by {simp [le_def] at *, assumption}
+        and.intro left right
 
     example : forall d: subtype Delta, not (d.val < (0: R) \/ 0 < d.val) :=
         assume d,
         have 0 <= d.val /\ d.val <= 0, from delta_close_to_zero d,
-        by {simp [le_def] at *, exact not_or this.left this.right}
+        not_or this.left this.right
 
     example : forall d: subtype Delta, forall a: R, Delta (d.val * a) :=
         assume d,

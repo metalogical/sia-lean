@@ -95,80 +95,65 @@ namespace sia
 
     -- Lemmas regarding ≤
 
-    lemma le_refl : a <= a := by simp [lt_irrefl, le_def]
+    lemma le_refl : a <= a := lt_irrefl a
 
     @[trans]
-    lemma le_trans : a <= b -> b <= c -> a <= c := begin
-        simp [le_def] at *,
-        exact
-            assume a_le_b b_le_c,
-            assume bad_c_lt_a,
-            have bad_or: c < b \/ b < a, from (lt_far bad_c_lt_a b),
-            or.elim bad_or b_le_c a_le_b
-    end
+    lemma le_trans : a <= b -> b <= c -> a <= c :=
+        assume a_le_b b_le_c,
+        assume bad_c_lt_a,
+        have bad_or: c < b \/ b < a, from (lt_far bad_c_lt_a b),
+        or.elim bad_or b_le_c a_le_b
 
-    lemma le_add_left : a <= b -> c + a <= c + b := begin
-        simp [le_def] at *,
-        exact
-            assume a_le_b,
-            assume almost_bad,
-            have bad: b < a, from calc
-                b   = -c + (b + c) : by simp
-                ... < -c + (a + c) : lt_add_left almost_bad (-c)
-                ... = a            : by simp,
-            a_le_b bad
-    end
+    lemma le_add_left : a <= b -> c + a <= c + b :=
+        assume a_le_b,
+        assume almost_bad,
+        have bad: b < a, from calc
+            b   = -c + (c + b) : by simp
+            ... < -c + (c + a) : lt_add_left almost_bad (-c)
+            ... = a            : by simp,
+        a_le_b bad
 
     lemma le_zero_one : (0: R) <= 1 :=
-        have almost: not ((1: R) < 0), from
-            assume bad : (1: R) < 0,
-            lt_irrefl (0 : R) (lt_trans lt_zero_one bad),
-        iff.elim_right (le_def R) almost
+        assume bad : (1: R) < 0,
+        lt_irrefl (0 : R) (lt_trans lt_zero_one bad)
 
-    lemma le_mul_pos_left : a <= b -> 0 <= c -> c * a <= c * b := begin
-        simp [le_def] at *,
-        exact
-            assume a_le_b,
-            assume zero_le_c,
-            assume bc_lt_ac,
+    lemma le_mul_pos_left : a <= b -> 0 <= c -> c * a <= c * b :=
+        assume a_le_b,
+        assume zero_le_c,
+        assume bc_lt_ac,
 
-            have c_ne_zero: ne c 0, from
-                assume bad: c = 0,
-                have b * c = a * c, by simp [bad, mul_zero],
-                absurd this (lt_ne bc_lt_ac),
-            have c < 0 \/ 0 < c, from ne_lt c_ne_zero,
+        have c_ne_zero: ne c 0, from
+            assume bad: c = 0,
+            have c * b = c * a, by simp [bad, mul_zero],
+            absurd this (lt_ne bc_lt_ac),
+        have c < 0 \/ 0 < c, from ne_lt c_ne_zero,
 
-            have right : not (0 < c), from
-                assume c_pos,
-                have b < a, from (calc
-                    b   = (1 / c) * c * b   : by rw [one_div_mul_cancel c_ne_zero, one_mul]
-                    ... = (1 / c) * (b * c) : by simp [mul_comm, mul_assoc]
-                    ... < (1 / c) * (a * c) : lt_mul_pos_left (one_div_pos_of_pos c_pos) bc_lt_ac
-                    ... = (1 / c) * c * a   : by simp [mul_comm, mul_assoc]
-                    ... = a                 : by rw [one_div_mul_cancel c_ne_zero, one_mul]
-                ),
-                a_le_b this,
-            or.elim this zero_le_c right
-    end
-
-    lemma le_neg_flip : a <= b -> -b <= -a := begin
-        simp [le_def] at *,
-        exact
-            assume a_le_b,
-            assume neg_a_lt_neg_b,
+        have right : not (0 < c), from
+            assume c_pos,
             have b < a, from (calc
-                b = - - b   : by rw neg_neg
-                ... < - - a : lt_neg_flip neg_a_lt_neg_b
-                ... = a     : by rw neg_neg
+                b   = (1 / c) * c * b   : by rw [one_div_mul_cancel c_ne_zero, one_mul]
+                ... = (1 / c) * (c * b) : by simp [mul_assoc]
+                ... < (1 / c) * (c * a) : lt_mul_pos_left (one_div_pos_of_pos c_pos) bc_lt_ac
+                ... = (1 / c) * c * a   : by simp [mul_assoc]
+                ... = a                 : by rw [one_div_mul_cancel c_ne_zero, one_mul]
             ),
-            absurd this a_le_b
-    end
+            a_le_b this,
+        or.elim this zero_le_c right
+
+    lemma le_neg_flip : a <= b -> -b <= -a :=
+        assume a_le_b,
+        assume neg_a_lt_neg_b,
+        have b < a, from (calc
+            b   = -(-b) : by rw neg_neg
+            ... < -(-a) : lt_neg_flip neg_a_lt_neg_b
+            ... = a     : by rw neg_neg
+        ),
+        absurd this a_le_b
 
     @[trans]
     lemma le_lt_trans : a <= b -> b < c -> a < c :=
         assume le,
         assume lt,
-        have le: not (b < a), from iff.elim_left (le_def R) le,
         have ne a c, from
             assume bad,
             have b < a, by {rw bad, assumption},
@@ -184,7 +169,6 @@ namespace sia
     lemma lt_le_trans : a < b -> b <= c -> a < c :=
         assume lt,
         assume le,
-        have le: not (c < b), from iff.elim_left (le_def R) le,
         have ne a c, from
             assume bad,
             have c < b, by {rw <-bad, assumption},
