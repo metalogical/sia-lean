@@ -37,7 +37,7 @@ namespace sia
             ... = a : by rw bad_a_eq_b
         )
 
-    lemma lt_far : forall {a b: R}, a < b -> forall x: R, a < x \/ x < b := -- Bell 1.2
+    lemma lt_far : forall {a b: R}, a < b -> far a b := -- Bell 1.2
         assume a b,
         assume a_lt_b,
         assume x,
@@ -182,10 +182,10 @@ namespace sia
 
     -- General Theorems
 
-    theorem microcancellation : forall a b: R, (forall d: subtype Delta, a * d.val = b * d.val) -> a = b :=
+    theorem microcancellation : forall a b: R, (forall d: subtype (Delta R), a * d.val = b * d.val) -> a = b :=
         assume a b,
-        assume ea_eq_eb : forall d: subtype Delta, a * d.val = b * d.val,
-        let f (d : subtype Delta) : R := a * d.val in 
+        assume ea_eq_eb : forall d: subtype (Delta R), a * d.val = b * d.val,
+        let f (d : subtype (Delta R)) : R := a * d.val in 
         begin
             apply (unique_of_exists_unique (kock_lawvere f)),
             show forall d, f d = a * 0 + a * d.val,
@@ -198,17 +198,56 @@ namespace sia
                 reflexivity,
         end
 
-    theorem microaffinity : forall f: R -> R, forall x: R, exists! a: R, forall d: subtype Delta, f (x + d.val) = f x + a * d.val :=
+    theorem microaffinity : forall f: R -> R, forall x: R, exists! a: R, forall d: subtype (Delta R), f (x + d.val) = f x + a * d.val :=
         assume f: R -> R,
         assume x: R,
-        let g (d: subtype Delta) : R := f (x + d.val) in
+        let g (d: subtype (Delta R)) : R := f (x + d.val) in
         have nice: f x = g 0, from eq.symm (eq.subst (add_group.add_zero x) (eq.refl _)),
         begin
-            show exists! a: R, forall d: subtype Delta, g d = f x + a * d.val,
+            show exists! a: R, forall d: subtype (Delta R), g d = f x + a * d.val,
             rewrite nice,
             apply kock_lawvere,
         end
 
+    theorem delta_near_zero : forall d: subtype (Delta R), 0 <= d.val /\ d.val <= 0 :=
+        assume d,
+        have left: not (d.val < 0), from
+            assume bad,
+            have 0 < -d.val, by {rw <-neg_zero, apply lt_neg_flip bad},
+            have 0 < d.val * d.val, by {rw <-neg_mul_neg, rw <-mul_zero, apply lt_mul_pos_left this, assumption},
+            absurd d.property (ne.symm (lt_ne this)),
+        have right: not (0 < d.val), from
+            assume bad,
+            have 0 < d.val * d.val, by {rw <-mul_zero, apply lt_mul_pos_left bad bad},
+            absurd d.property (ne.symm (lt_ne this)),
+        and.intro left right
+
     section -- Theorem 1.1
+        theorem delta_in_zero_zero : set.subset (Delta R) [[(0: R) ... 0]] :=
+            assume a,
+            assume a_in_Delta,
+            delta_near_zero { val := a, property := a_in_Delta }
+
+        theorem delta_nondegenerate : not (degenerate (Delta R)) :=
+            assume deg,
+            have d_eq_zero: forall y: subtype (Delta R), (0: R) = y.val, from deg 0,
+            let f := fun r: R, r in
+            have bad: exists! a: R, forall d: subtype (Delta R), 0 + d.val = 0 + a * d.val, from microaffinity f 0,
+            have pf_zero: forall d: subtype (Delta R), 0 + d.val = 0 + 0 * d.val, from
+                assume d,
+                calc
+                    0 + d.val = d.val + 0 * d.val : by simp
+                    ...       = 0 + 0 * d.val     : by rw d_eq_zero d,
+            have pf_one: forall d: subtype (Delta R), 0 + d.val = 0 + 1 * d.val, by simp,
+            have (0: R) = 1, from unique_of_exists_unique bad pf_zero pf_one,
+            absurd this (lt_ne lt_zero_one)
+
+        theorem delta_indistinguishable_zero : forall d: subtype (Delta R), not (not (d.val = 0)) :=
+            assume d,
+            assume bad: ne d.val 0,
+            have d.val < 0 \/ 0 < d.val, from ne_lt bad,
+            have left: not (d.val < 0), from and.elim_left (delta_near_zero d),
+            have right: not (0 < d.val), from and.elim_right (delta_near_zero d),
+            or.elim this left right
     end
 end sia

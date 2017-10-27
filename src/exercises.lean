@@ -117,22 +117,9 @@ section --1.5
 end
 
 section -- 1.6
-    lemma delta_close_to_zero : forall d: subtype Delta, (0: R) <= d.val /\ d.val <= 0 :=
-        assume d,
-        have left: not (d.val < 0), from
-            assume bad,
-            have 0 < -d.val, by {rw <-neg_zero, apply lt_neg_flip bad},
-            have 0 < d.val * d.val, by {rw <-neg_mul_neg, rw <-mul_zero, apply lt_mul_pos_left this, assumption},
-            absurd d.property (ne.symm (lt_ne this)),
-        have right: not (0 < d.val), from
-            assume bad,
-            have 0 < d.val * d.val, by {rw <-mul_zero, apply lt_mul_pos_left bad bad},
-            absurd d.property (ne.symm (lt_ne this)),
-        and.intro left right
-
     example : forall d: subtype Delta, not (d.val < (0: R) \/ 0 < d.val) :=
         assume d,
-        have 0 <= d.val /\ d.val <= 0, from delta_close_to_zero d,
+        have 0 <= d.val /\ d.val <= 0, from delta_near_zero d,
         not_or this.left this.right
 
     example : forall d: subtype Delta, forall a: R, Delta (d.val * a) :=
@@ -150,7 +137,7 @@ section -- 1.6
         assume a,
         assume a_pos,
         calc
-            0   <= d.val    : and.elim_left (delta_close_to_zero d)
+            0   <= d.val    : and.elim_left (delta_near_zero d)
             ... = d.val + 0 : by rw add_zero
             ... < d.val + a : lt_add_left a_pos _
             ... = a + d.val : by rw add_comm

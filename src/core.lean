@@ -7,6 +7,9 @@ notation `exists!` binders `, ` r:(scoped P, exists_unique P) := r
 
 variable {R : Type u}
 
+@[reducible]
+def degenerate (S : set R) : Prop := forall x y : subtype S, x.val = y.val
+
 section -- microneighborhoods
     variable [ring R]
 
@@ -55,9 +58,18 @@ namespace sia -- intervals
     @[reducible]
     def microneighborhood : R -> set R := microneighborhood
     @[reducible]
-    def Delta : set R := microneighborhood (0 : R)
+    def Delta (R : Type u) [sia R] (r : R) := microneighborhood (0 : R) r
     @[reducible]
     def microstable : set R -> Prop := microstable
 
-    instance : has_zero (subtype Delta) := (| { val := (0 : R), property := ring.mul_zero (0 : R) } |)
+    instance : has_zero (subtype (Delta R)) := (| { val := (0 : R), property := ring.mul_zero (0 : R) } |)
+
+    @[reducible]
+    def far (a b : R) := forall x: R, a < x \/ x < b
+    @[reducible]
+    def near (a b : R) := not (far a b)
+    @[reducible]
+    def distinguishable (a b : R) := ne a b
+    @[reducible]
+    def indistinguishable (a b : R) := not (distinguishable a b)
 end sia
