@@ -61,20 +61,21 @@ end
 
 -- 1.2 in basic.lean
 
-example : forall {a b: R}, not (a < b) -> [a ... b] -> false := -- 1.3; i.e. [a ... b] is empty
+example : forall {a b: R}, not (a < b) -> forall x: R, not (set.mem x [a ... b]) := -- 1.3; i.e. [a ... b] is empty
     assume a b,
     assume not_a_lt_b,
+    assume x,
     assume bad_elem,
-    have bad: a < bad_elem.val /\ bad_elem.val < b, from bad_elem.property,
+    have bad: a < x /\ x < b, from bad_elem,
     not_a_lt_b (lt_trans (and.elim_left bad) (and.elim_right bad))
 
 -- 1.4 in basic.lean
 
 section --1.5
     @[reducible]
-    def convex_comb (x y : R) (t : [[(0: R) ... 1]]) := t.val * y + (1 - t.val) * x
+    def convex_comb (x y : R) (t : subtype [[(0: R) ... 1]]) := t.val * y + (1 - t.val) * x
 
-    example : forall a b : R, forall x y : [[a ... b]], forall t : [[0 ... 1]],
+    example : forall a b : R, forall x y : subtype [[a ... b]], forall t : subtype [[0 ... 1]],
                 a <= convex_comb x.val y.val t /\ convex_comb x.val y.val t <= b :=
         assume a b,
         assume x y,

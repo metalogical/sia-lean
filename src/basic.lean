@@ -209,4 +209,6 @@ namespace sia
             apply kock_lawvere,
         end
 
+    section -- Theorem 1.1
+    end
 end sia

@@ -45,8 +45,8 @@ attribute [reducible] has_le.le
 namespace sia -- intervals
     variable [sia R]
 
-    definition open_interval (a: R) (b: R) : Type u := { r: R // a < r /\ r < b }
-    definition closed_interval (a: R) (b: R) : Type u := { r: R // a <= r /\ r <= b }
+    definition open_interval (a: R) (b: R) : set R := fun r: R, a < r /\ r < b
+    definition closed_interval (a: R) (b: R) : set R := fun r: R, a <= r /\ r <= b
 
     notation `[` a `...` b `]` := open_interval a b
     notation `[[` a `...` b `]]` := closed_interval a b
