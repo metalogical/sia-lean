@@ -182,22 +182,6 @@ namespace sia
 
     -- General Theorems
 
-    theorem microcancellation : forall a b: R, (forall d: subtype (Delta R), a * d.val = b * d.val) -> a = b :=
-        assume a b,
-        assume ea_eq_eb : forall d: subtype (Delta R), a * d.val = b * d.val,
-        let f (d : subtype (Delta R)) : R := a * d.val in 
-        begin
-            apply (unique_of_exists_unique (kock_lawvere f)),
-            show forall d, f d = a * 0 + a * d.val,
-                simp,
-            show forall d, f d = a * 0 + b * d.val,
-                simp,
-                show forall d, f d = b * d.val,
-                intro d,
-                apply eq.trans (ea_eq_eb d),
-                reflexivity,
-        end
-
     theorem microaffinity : forall f: R -> R, forall x: R, exists! a: R, forall d: subtype (Delta R), f (x + d.val) = f x + a * d.val :=
         assume f: R -> R,
         assume x: R,
@@ -249,5 +233,31 @@ namespace sia
             have left: not (d.val < 0), from and.elim_left (delta_near_zero d),
             have right: not (0 < d.val), from and.elim_right (delta_near_zero d),
             or.elim this left right
+
+        theorem not_lem_delta_zero_eq : not (forall d: subtype (Delta R), d.val = 0 \/ ne d.val 0) :=
+            assume bad,
+            have forall d: subtype (Delta R), d.val = 0, from
+                assume d,
+                or.resolve_right (bad d) (delta_indistinguishable_zero d),
+            have forall x y: subtype (Delta R), x.val = y.val, from
+                assume x y,
+                eq.trans (this x) (eq.symm (this y)),
+            delta_nondegenerate this
+
+        theorem microcancellation : forall a b: R, (forall d: subtype (Delta R), a * d.val = b * d.val) -> a = b :=
+            assume a b,
+            assume ea_eq_eb : forall d: subtype (Delta R), a * d.val = b * d.val,
+            let f (d : subtype (Delta R)) : R := a * d.val in 
+            begin
+                apply (unique_of_exists_unique (kock_lawvere f)),
+                show forall d, f d = a * 0 + a * d.val,
+                    simp,
+                show forall d, f d = a * 0 + b * d.val,
+                    simp,
+                    show forall d, f d = b * d.val,
+                    intro d,
+                    apply eq.trans (ea_eq_eb d),
+                    reflexivity,
+            end
     end
 end sia
