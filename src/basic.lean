@@ -19,14 +19,10 @@ namespace sia
     lemma lt_neg_flip : a < b -> -b < -a :=
         assume lt: a < b,
         calc
-            -b  = -b + 0        : by rw add_zero
-            ... = -b + (-a + a) : by rw add_left_neg
+            -b  = -b + (-a + a) : by simp
             ... = (-b + -a) + a : by rw add_assoc
             ... < (-b + -a) + b : lt_add_left lt _
-            ... = (-a + -b) + b : congr_arg (fun x, x + b) (add_comm _ _)
-            ... = -a + (-b + b) : by rw add_assoc
-            ... = -a + 0        : by rw add_left_neg
-            ... = -a            : by rw add_zero
+            ... = -a            : by simp
 
     lemma lt_ne : forall {a b : R}, a < b -> ne a b :=
         assume a b,
@@ -37,7 +33,7 @@ namespace sia
             ... = a : by rw bad_a_eq_b
         )
 
-    lemma lt_far : forall {a b: R}, a < b -> far a b := -- Bell 1.2
+    lemma lt_far : forall {a b: R}, a < b -> forall x: R, a < x \/ x < b := -- Bell 1.2
         assume a b,
         assume a_lt_b,
         assume x,

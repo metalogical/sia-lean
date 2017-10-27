@@ -117,12 +117,12 @@ section --1.5
 end
 
 section -- 1.6
-    example : forall d: subtype Delta, not (d.val < (0: R) \/ 0 < d.val) :=
+    example : forall d: subtype (Delta R), not (d.val < (0: R) \/ 0 < d.val) :=
         assume d,
         have 0 <= d.val /\ d.val <= 0, from delta_near_zero d,
         not_or this.left this.right
 
-    example : forall d: subtype Delta, forall a: R, Delta (d.val * a) :=
+    example : forall d: subtype (Delta R), forall a: R, (Delta R) (d.val * a) :=
         assume d,
         assume a,
         have d.val * d.val = 0, from d.property,
@@ -132,7 +132,7 @@ section -- 1.6
             ... = 0 * a * a             : by rw this
             ... = 0                     : by simp [zero_mul]
 
-    example : forall d: subtype Delta, forall a: R, 0 < a -> 0 < a + d.val :=
+    example : forall d: subtype (Delta R), forall a: R, 0 < a -> 0 < a + d.val :=
         assume d,
         assume a,
         assume a_pos,

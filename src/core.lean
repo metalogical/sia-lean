@@ -27,10 +27,9 @@ section -- microneighborhoods
 end
 
 -- Smooth Infinitesimal Analysis
-class sia R extends field R, has_lt R := --, has_le R :=
+class sia R extends field R, has_lt R :=
     (lt_irrefl : forall a : R, not (a < a))
     (lt_trans  : forall {a b c : R}, a < b -> b < c -> a < c)
-    -- (le_def    : forall {a b : R}, a <= b <-> not (b < a))
     (ne_lt     : forall {a b : R}, ne a b -> a < b \/ b < a)
 
     (zero_one_far       : forall a: R, 0 < a \/ a < 1)
@@ -63,13 +62,4 @@ namespace sia -- intervals
     def microstable : set R -> Prop := microstable
 
     instance : has_zero (subtype (Delta R)) := (| { val := (0 : R), property := ring.mul_zero (0 : R) } |)
-
-    @[reducible]
-    def far (a b : R) := forall x: R, a < x \/ x < b
-    @[reducible]
-    def near (a b : R) := not (far a b)
-    @[reducible]
-    def distinguishable (a b : R) := ne a b
-    @[reducible]
-    def indistinguishable (a b : R) := not (distinguishable a b)
 end sia
