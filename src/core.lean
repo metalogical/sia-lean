@@ -7,8 +7,10 @@ notation `exists!` binders `, ` r:(scoped P, exists_unique P) := r
 
 variable {R : Type u}
 
-@[reducible]
-def degenerate (S : set R) : Prop := forall x y : subtype S, x.val = y.val
+namespace set -- define a special set equality in order to avoid having to introduce funext/propext
+    @[reducible]
+    def eq (A : set R) (B : set R) := forall x : R, set.mem x A <-> set.mem x B
+end set
 
 section -- microneighborhoods
     variable [ring R]

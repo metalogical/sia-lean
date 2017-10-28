@@ -142,3 +142,39 @@ section -- 1.6
             ... < d.val + a : lt_add_left a_pos _
             ... = a + d.val : by rw add_comm
 end
+
+section -- 1.7
+    example : forall a b : R, forall d e : subtype (Delta R), set.eq [[a ... b]] [[a + d.val ... b + e.val]] :=
+        assume a b,
+        assume d e,
+        assume x,
+        have forwards : set.mem x [[a ... b]] -> set.mem x [[a + d.val ... b + e.val]], from
+            assume x_mem,
+            have ge: a + d.val <= x, from
+                have d.val <= 0, from and.elim_right (delta_near_zero d),
+                calc a + d.val
+                    <= a + 0 : by {apply le_add_left this}
+                ... <= x     : by {simp, apply and.elim_left x_mem},
+            have le: x <= b + e.val, from
+                have 0 <= e.val, from and.elim_left (delta_near_zero e),
+                calc
+                  x <= b + 0     : by {simp, apply and.elim_right x_mem}
+                ... <= b + e.val : le_add_left this,
+            and.intro ge le,
+        have backwards : set.mem x [[a + d.val ... b + e.val]] -> set.mem x [[a ... b]], from
+            assume x_mem,
+            have ge: a <= x, from
+                have 0 <= d.val, from and.elim_left (delta_near_zero d),
+                calc
+                  a = a + 0      : by simp
+                ... <= a + d.val : by {apply le_add_left this}
+                ... <= x         : and.elim_left x_mem,
+            have le: x <= b, from
+                have e.val <= 0, from and.elim_right (delta_near_zero e),
+                calc
+                  x <= b + e.val : and.elim_right x_mem
+                ... <= b + 0     : by {apply le_add_left this}
+                ... = b          : by simp,
+            and.intro ge le,
+        iff.intro forwards backwards
+end

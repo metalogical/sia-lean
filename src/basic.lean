@@ -208,6 +208,9 @@ namespace sia
             assume a_in_Delta,
             delta_near_zero { val := a, property := a_in_Delta }
 
+        @[reducible]
+        def degenerate (S : set R) : Prop := forall x y : subtype S, x.val = y.val
+
         theorem delta_nondegenerate : not (degenerate (Delta R)) :=
             assume deg,
             have d_eq_zero: forall y: subtype (Delta R), (0: R) = y.val, from deg 0,
