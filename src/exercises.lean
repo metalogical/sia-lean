@@ -178,3 +178,75 @@ section -- 1.7
             and.intro ge le,
         iff.intro forwards backwards
 end
+
+section -- 1.8
+    @[reducible]
+    def rigid_rod (R : Type) [sia R] : Type := subtype (Delta R) -> R
+
+    private meta def lift_funext : tactic unit := `[ intro f, intros, apply funext, intro d ]
+
+    instance rigid_rod_ring [sia R] : ring (rigid_rod R) := {
+        add := fun f g, fun d, f d + g d,
+        zero := fun d, 0,
+        neg := fun f, fun d, -(f d),
+        mul := fun f g, fun d, f d * g d,
+        one := fun d, 1,
+
+        add_assoc := by {lift_funext, show _ + _ = _ + _, rw add_assoc},
+        add_comm := by {lift_funext, show _ + _ = _ + _, rw add_comm},
+        add_zero := by {lift_funext, show f d + 0 = f d, rw add_zero},
+        zero_add := by {lift_funext, show 0 + f d = f d, rw zero_add},
+        add_left_neg := by {lift_funext, show -(f d) + f d = 0, rw add_left_neg},
+        mul_assoc := by {lift_funext, show _ * _ = _ * _, rw mul_assoc},
+        one_mul := by {lift_funext, show 1 * f d = f d, rw one_mul},
+        mul_one := by {lift_funext, show f d * 1 = f d, rw mul_one},
+        left_distrib := by {lift_funext, show _ * _ = _ + _, rw left_distrib},
+        right_distrib := by {lift_funext, show _ * _ = _ + _, rw right_distrib},
+    }
+
+    instance prod_ring {T : Type} [ring T] : ring (T × T) := {
+        add := fun x y, (x.fst + y.fst, x.snd + y.snd),
+        zero := (0, 0),
+        neg := fun x, (-x.fst, -x.snd),
+        mul := fun x y, (x.fst * y.fst, x.fst * y.snd + x.snd * y.fst),
+        one := (1, 0),
+
+        add_assoc := by {intros, simp},
+        add_comm := by {intros, show (_, _) = (_, _), simp},
+        add_zero := by {intro x, cases x, show (_, _) = (_, _), simp},
+        zero_add := by {intro x, cases x, show (_, _) = (_, _), simp},
+        add_left_neg := by {intro x, cases x, show (_, _) = (_, _), simp},
+        mul_assoc := by {intros, simp [left_distrib, right_distrib]},
+        one_mul := by {intro x, cases x, show (_, _) = (_, _), simp},
+        mul_one := by {intro x, cases x, show (_, _) = (_, _), simp},
+        left_distrib := by {intros, simp [left_distrib]},
+        right_distrib := by {intros, simp [right_distrib]},
+    }
+
+    @[reducible]
+    def iso : R × R -> rigid_rod R := fun ab, fun d, ab.fst + ab.snd * d.val
+
+    example : forall x y: R × R, iso (x + y) = iso x + iso y := begin
+        intros,
+        apply funext,
+        intro,
+        show (_ + _) + (_ + _) * _ = (_ + _ * _) + (_ + _ * _), -- reduce iso
+        simp [left_distrib]
+    end
+
+    example : forall x y: R × R, iso (x * y) = iso x * iso y := begin
+        intros,
+        apply funext,
+        intro d,
+        have sq_zero: d.val * d.val = 0, from d.property,
+        show (_ * _) + (_ + _) * _ = (_ + _ * _) * (_ + _ * _), -- reduce iso
+        simp [left_distrib, sq_zero],
+    end
+
+    example : iso 1 = (1: rigid_rod R) := begin
+        apply funext,
+        intro,
+        show (_, _).fst + (_, _).snd * _ = (1 : R),
+        simp
+    end
+end
