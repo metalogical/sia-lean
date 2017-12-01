@@ -250,3 +250,44 @@ section -- 1.8
         simp
     end
 end
+
+section -- 1.9
+    lemma microproduct_not_zero : not (forall e n : subtype (Delta R), e.val * n.val = 0) :=
+        assume bad,
+        have forall d e : subtype (Delta R), d.val = e.val, from
+            assume d e,
+            have forall n : subtype (Delta R), d.val * n.val = e.val * n.val, from 
+                assume n,
+                (calc
+                    d.val * n.val = 0     : bad d n
+                    ...   = e.val * n.val : eq.symm (bad e n)
+                ),
+            sia.microcancellation this,
+        sia.delta_nondegenerate this
+
+    example : not (sia.microstable (Delta R)) :=
+        assume bad,
+        have forall a b : subtype (Delta R), a.val * b.val = 0, from
+            assume a b,
+            have a_nilpotent : a.val * a.val = 0, from a.property,
+            have b_nilpotent : b.val * b.val = 0, from b.property,
+            have sum_nilpotent : (a.val + b.val) * (a.val + b.val) = 0, from bad a b,
+            have ne (2 : R) (0 : R), from ne.symm (sia.lt_ne (calc (0:R)
+                < 1     : sia.lt_zero_one
+            ... = 1 + 0 : by simp
+            ... < 1 + 1 : sia.lt_add_left sia.lt_zero_one 1)),
+            (calc a.val * b.val
+                = (a.val * b.val) * 2 / 2 : by rw (mul_div_cancel _ this)
+            ... = (a.val * b.val) * (1 + 1) / 2 : by refl
+            ... = (a.val * b.val + a.val * b.val) / 2 : by rw [left_distrib, mul_one]
+            ... = ((0 + a.val * b.val) + (a.val * b.val + 0)) / 2 : by simp
+            ... = ((a.val * a.val + a.val * b.val) + (a.val * b.val + b.val * b.val)) / 2 : by rw [a_nilpotent, b_nilpotent]
+            ... = ((a.val + b.val) * (a.val + b.val)) / 2 : by simp [left_distrib, right_distrib]
+            ... = 0 / 2 : by rw [sum_nilpotent]
+            ... = 0 : by rw [zero_div]),
+        microproduct_not_zero this
+
+    example : not (forall x y : R, x * x + y * y = 0 -> x * x = 0) :=
+        assume bad,
+        sorry
+end

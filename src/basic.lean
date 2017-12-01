@@ -243,7 +243,7 @@ namespace sia
                 eq.trans (this x) (eq.symm (this y)),
             delta_nondegenerate this
 
-        theorem microcancellation : forall a b: R, (forall d: subtype (Delta R), a * d.val = b * d.val) -> a = b :=
+        theorem microcancellation : forall {a b: R}, (forall d: subtype (Delta R), a * d.val = b * d.val) -> a = b :=
             assume a b,
             assume ea_eq_eb : forall d: subtype (Delta R), a * d.val = b * d.val,
             let f (d : subtype (Delta R)) : R := a * d.val in 
