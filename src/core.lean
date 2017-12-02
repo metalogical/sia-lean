@@ -1,31 +1,17 @@
-prelude
-import init.algebra.field
-import init.data.set
 universe u
 
 notation `exists!` binders `, ` r:(scoped P, exists_unique P) := r
 
 variable {R : Type u}
 
-namespace set -- define a special set equality in order to avoid having to introduce funext/propext
-    @[reducible]
-    def eq (A : set R) (B : set R) := forall x : R, set.mem x A <-> set.mem x B
-end set
-
-section -- microneighborhoods
+section -- define Delta in terms of ring to avoid circularity in the definition of sia
     variable [ring R]
 
     @[reducible]
-    private definition microneighborhood (around : R) : set R := fun r, r * r = around
-
-    @[reducible]
-    private def Delta : set R := microneighborhood (0 : R)
+    private def Delta : set R := fun r, r * r = 0
 
     @[reducible]
     private def zero_Delta : has_zero (subtype Delta) := { zero := { val := (0 : R), property := ring.mul_zero (0 : R) } }
-
-    @[reducible]
-    private def microstable (A : set R) : Prop := forall a : subtype A, forall d : subtype Delta, set.mem (a.val + d.val) A
 end
 
 -- Smooth Infinitesimal Analysis
@@ -39,6 +25,7 @@ class sia R extends field R, has_lt R :=
     (lt_mul_pos_left    : forall {a b c : R}, 0 < c -> a < b -> c * a < c * b)
     (exists_unique_sqrt : forall a : { r: R // r > 0 }, exists! b, b * b = a.val)
     (kock_lawvere       : forall f: subtype Delta -> R, exists! a: R, forall d: subtype Delta, f d = f zero_Delta.zero + a * d.val)
+
 attribute [trans] sia.lt_trans -- allow use of transitivity in calc proofs
 
 instance sia_has_le [sia R] : has_le R := {
@@ -49,19 +36,18 @@ attribute [reducible] has_le.le
 namespace sia -- intervals
     variable [sia R]
 
+    @[reducible]
+    def microstable (A : set R) : Prop := forall a : subtype A, forall d : subtype Delta, set.mem (a.val + d.val) A
+
     definition open_interval (a: R) (b: R) : set R := fun r: R, a < r /\ r < b
     definition closed_interval (a: R) (b: R) : set R := fun r: R, a <= r /\ r <= b
 
     notation `[` a `...` b `]` := open_interval a b
     notation `[[` a `...` b `]]` := closed_interval a b
+end sia
 
-    -- redefine these, but parameterized by [sia R], rather than [ring R]
-    @[reducible]
-    def microneighborhood : R -> set R := microneighborhood
-    @[reducible]
-    def Delta (R : Type u) [sia R] (r : R) := microneighborhood (0 : R) r
-    @[reducible]
-    def microstable : set R -> Prop := microstable
-
-    instance : has_zero (subtype (Delta R)) := (| { val := (0 : R), property := ring.mul_zero (0 : R) } |)
+namespace sia
+    -- export Delta in terms of sia; type parameter R is explicit because Lean cannot typically infer it
+    @[reducible] def Delta (R: Type u) [sia R] := fun r : R, r * r = 0
+    instance {R : Type u} [sia R] : has_zero (subtype (Delta R)) := (| { val := (0 : R), property := ring.mul_zero (0 : R) } |)
 end sia

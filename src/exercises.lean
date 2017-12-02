@@ -1,9 +1,13 @@
 import .core
 import .basic
+import .util
 
-variable {R : Type}
-variable [sia R]
+section
+parameters {R : Type} [sia R]
 open sia
+
+@[reducible] private def Delta := Delta R
+@[reducible] private def DeltaT := subtype Delta
 
 
 section -- 1.1
@@ -117,12 +121,12 @@ section --1.5
 end
 
 section -- 1.6
-    example : forall d: subtype (Delta R), not (d.val < (0: R) \/ 0 < d.val) :=
+    example : forall d: subtype Delta, not (d.val < (0: R) \/ 0 < d.val) :=
         assume d,
         have 0 <= d.val /\ d.val <= 0, from delta_near_zero d,
         not_or this.left this.right
 
-    example : forall d: subtype (Delta R), forall a: R, (Delta R) (d.val * a) :=
+    example : forall d: subtype Delta, forall a: R, Delta (d.val * a) :=
         assume d,
         assume a,
         have d.val * d.val = 0, from d.property,
@@ -132,7 +136,7 @@ section -- 1.6
             ... = 0 * a * a             : by rw this
             ... = 0                     : by simp [zero_mul]
 
-    example : forall d: subtype (Delta R), forall a: R, 0 < a -> 0 < a + d.val :=
+    example : forall d: subtype Delta, forall a: R, 0 < a -> 0 < a + d.val :=
         assume d,
         assume a,
         assume a_pos,
@@ -144,48 +148,50 @@ section -- 1.6
 end
 
 section -- 1.7
-    example : forall a b : R, forall d e : subtype (Delta R), set.eq [[a ... b]] [[a + d.val ... b + e.val]] :=
+    example : forall a b : R, forall d e : subtype Delta, [[a ... b]] = [[a + d.val ... b + e.val]] :=
         assume a b,
         assume d e,
-        assume x,
-        have forwards : set.mem x [[a ... b]] -> set.mem x [[a + d.val ... b + e.val]], from
-            assume x_mem,
-            have ge: a + d.val <= x, from
-                have d.val <= 0, from and.elim_right (delta_near_zero d),
-                calc a + d.val
-                    <= a + 0 : by {apply le_add_left this}
-                ... <= x     : by {simp, apply and.elim_left x_mem},
-            have le: x <= b + e.val, from
-                have 0 <= e.val, from and.elim_left (delta_near_zero e),
-                calc
-                  x <= b + 0     : by {simp, apply and.elim_right x_mem}
-                ... <= b + e.val : le_add_left this,
-            and.intro ge le,
-        have backwards : set.mem x [[a + d.val ... b + e.val]] -> set.mem x [[a ... b]], from
-            assume x_mem,
-            have ge: a <= x, from
-                have 0 <= d.val, from and.elim_left (delta_near_zero d),
-                calc
-                  a = a + 0      : by simp
-                ... <= a + d.val : by {apply le_add_left this}
-                ... <= x         : and.elim_left x_mem,
-            have le: x <= b, from
-                have e.val <= 0, from and.elim_right (delta_near_zero e),
-                calc
-                  x <= b + e.val : and.elim_right x_mem
-                ... <= b + 0     : by {apply le_add_left this}
-                ... = b          : by simp,
-            and.intro ge le,
-        iff.intro forwards backwards
+        have set.eq [[a ... b]] [[a + d.val ... b + e.val]], from
+            assume x,
+            have forwards : set.mem x [[a ... b]] -> set.mem x [[a + d.val ... b + e.val]], from
+                assume x_mem,
+                have ge: a + d.val <= x, from
+                    have d.val <= 0, from and.elim_right (delta_near_zero d),
+                    calc a + d.val
+                        <= a + 0 : by {apply le_add_left this}
+                    ... <= x     : by {simp, apply and.elim_left x_mem},
+                have le: x <= b + e.val, from
+                    have 0 <= e.val, from and.elim_left (delta_near_zero e),
+                    calc
+                      x <= b + 0     : by {simp, apply and.elim_right x_mem}
+                    ... <= b + e.val : le_add_left this,
+                and.intro ge le,
+            have backwards : set.mem x [[a + d.val ... b + e.val]] -> set.mem x [[a ... b]], from
+                assume x_mem,
+                have ge: a <= x, from
+                    have 0 <= d.val, from and.elim_left (delta_near_zero d),
+                    calc
+                      a = a + 0      : by simp
+                    ... <= a + d.val : by {apply le_add_left this}
+                    ... <= x         : and.elim_left x_mem,
+                have le: x <= b, from
+                    have e.val <= 0, from and.elim_right (delta_near_zero e),
+                    calc
+                      x <= b + e.val : and.elim_right x_mem
+                    ... <= b + 0     : by {apply le_add_left this}
+                    ... = b          : by simp,
+                and.intro ge le,
+            iff.intro forwards backwards,
+        set.ext this
 end
 
 section -- 1.8
     @[reducible]
-    def rigid_rod (R : Type) [sia R] : Type := subtype (Delta R) -> R
+    def rigid_rod : Type := DeltaT -> R
 
     private meta def lift_funext : tactic unit := `[ intro f, intros, apply funext, intro d ]
 
-    instance rigid_rod_ring [sia R] : ring (rigid_rod R) := {
+    instance rigid_rod_ring [sia R] : ring rigid_rod := {
         add := fun f g, fun d, f d + g d,
         zero := fun d, 0,
         neg := fun f, fun d, -(f d),
@@ -224,7 +230,7 @@ section -- 1.8
     }
 
     @[reducible]
-    def iso : R × R -> rigid_rod R := fun ab, fun d, ab.fst + ab.snd * d.val
+    def iso : R × R -> rigid_rod := fun ab, fun d, ab.fst + ab.snd * d.val
 
     example : forall x y: R × R, iso (x + y) = iso x + iso y := begin
         intros,
@@ -243,7 +249,7 @@ section -- 1.8
         simp [left_distrib, sq_zero],
     end
 
-    example : iso 1 = (1: rigid_rod R) := begin
+    example : iso 1 = (1: rigid_rod) := begin
         apply funext,
         intro,
         show (_, _).fst + (_, _).snd * _ = (1 : R),
@@ -252,11 +258,11 @@ section -- 1.8
 end
 
 section -- 1.9
-    lemma microproduct_not_zero : not (forall e n : subtype (Delta R), e.val * n.val = 0) :=
+    lemma microproduct_not_zero : not (forall e n : subtype Delta, e.val * n.val = 0) :=
         assume bad,
-        have forall d e : subtype (Delta R), d.val = e.val, from
+        have forall d e : subtype Delta, d.val = e.val, from
             assume d e,
-            have forall n : subtype (Delta R), d.val * n.val = e.val * n.val, from 
+            have forall n : subtype Delta, d.val * n.val = e.val * n.val, from 
                 assume n,
                 (calc
                     d.val * n.val = 0     : bad d n
@@ -265,9 +271,9 @@ section -- 1.9
             sia.microcancellation this,
         sia.delta_nondegenerate this
 
-    example : not (sia.microstable (Delta R)) :=
+    example : not (sia.microstable Delta) :=
         assume bad,
-        have forall a b : subtype (Delta R), a.val * b.val = 0, from
+        have forall a b : subtype Delta, a.val * b.val = 0, from
             assume a b,
             have a_nilpotent : a.val * a.val = 0, from a.property,
             have b_nilpotent : b.val * b.val = 0, from b.property,
@@ -290,4 +296,6 @@ section -- 1.9
     example : not (forall x y : R, x * x + y * y = 0 -> x * x = 0) :=
         assume bad,
         sorry
+end
+
 end
