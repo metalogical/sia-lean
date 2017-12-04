@@ -29,7 +29,7 @@ section
         and.intro left right
 
     section -- Theorem 1.1
-        theorem delta_in_zero_zero : set.subset Delta [[(0: R) ... 0]] :=
+        theorem delta_in_zero_interval : set.subset Delta [[(0: R) ... 0]] :=
             assume a,
             assume a_in_Delta,
             delta_near_zero { val := a, property := a_in_Delta }
@@ -59,7 +59,7 @@ section
             have right: not (0 < d.val), from and.elim_right (delta_near_zero d),
             or.elim this left right
 
-        theorem not_lem_delta_zero_eq : not (forall d: DeltaT, d.val = 0 \/ ne d.val 0) :=
+        theorem not_lem_eq_delta_zero : not (forall d: DeltaT, d.val = 0 \/ ne d.val 0) :=
             assume bad,
             have forall d: DeltaT, d.val = 0, from
                 assume d,
