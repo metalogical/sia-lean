@@ -13,7 +13,7 @@ open sia
 section -- 1.1
     variable (a: R)
 
-    example : 0 < a -> ne 0 a :=
+    example : 0 < a -> 0 != a :=
         assume a_pos,
         assume a_zero_bad: 0 = a,
         lt_irrefl (0: R) (calc
@@ -278,7 +278,7 @@ section -- 1.9
             have a_nilpotent : a.val * a.val = 0, from a.property,
             have b_nilpotent : b.val * b.val = 0, from b.property,
             have sum_nilpotent : (a.val + b.val) * (a.val + b.val) = 0, from bad a b,
-            have ne (2 : R) (0 : R), from ne.symm (lt_ne (calc (0:R)
+            have (2 : R) != 0, from ne.symm (lt_ne (calc (0:R)
                 < 1     : lt_zero_one R
             ... = 1 + 0 : by simp
             ... < 1 + 1 : lt_add_left (lt_zero_one R) 1)),

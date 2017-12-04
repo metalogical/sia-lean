@@ -53,13 +53,13 @@ section
 
         theorem delta_indistinguishable_zero : forall d: DeltaT, not (not (d.val = 0)) :=
             assume d,
-            assume bad: ne d.val 0,
+            assume bad: d.val != 0,
             have d.val < 0 \/ 0 < d.val, from st_order.ne_lt bad,
             have left: not (d.val < 0), from and.elim_left (delta_near_zero d),
             have right: not (0 < d.val), from and.elim_right (delta_near_zero d),
             or.elim this left right
 
-        theorem not_lem_eq_delta_zero : not (forall d: DeltaT, d.val = 0 \/ ne d.val 0) :=
+        theorem not_lem_eq_delta_zero : not (forall d: DeltaT, d.val = 0 \/ d.val != 0) :=
             assume bad,
             have forall d: DeltaT, d.val = 0, from
                 assume d,

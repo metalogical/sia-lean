@@ -1,6 +1,7 @@
 universe u
 
 notation `exists!` binders `, ` r:(scoped P, exists_unique P) := r
+infix ` != `:50 := ne
 
 namespace set -- set extensionality
     variable {R : Type u}

@@ -1,10 +1,12 @@
+import .util
+
 universe u
 variable {R : Type u}
 
 class st_order R extends has_lt R := -- strict total order
     (lt_irrefl : forall a : R, not (a < a))
     (lt_trans  : forall {a b c : R}, a < b -> b < c -> a < c)
-    (ne_lt     : forall {a b : R}, ne a b -> a < b \/ b < a)
+    (ne_lt     : forall {a b : R}, a != b -> a < b \/ b < a)
     -- Bell 1.2, but we use it as an axiom for better structure
     (lt_far    : forall {a b : R}, a < b -> forall c : R, a < c \/ c < b)
 attribute [trans] st_order.lt_trans -- allow use of transitivity in calc proofs
@@ -32,7 +34,7 @@ namespace st_order
     }
     attribute [reducible] has_le.le
 
-    lemma lt_ne : a < b -> ne a b :=
+    lemma lt_ne : a < b -> a != b :=
         assume a_lt_b,
         assume bad_a_eq_b: a = b,
         st_order.lt_irrefl a (calc
@@ -53,7 +55,7 @@ namespace st_order
     lemma le_lt_trans : a <= b -> b < c -> a < c :=
         assume le,
         assume lt,
-        have ne a c, from
+        have a != c, from
             assume bad,
             have b < a, by {rw bad, assumption},
             le this,
@@ -81,8 +83,8 @@ namespace st_ordered_field
 
     lemma one_div_pos_of_pos : 0 < c -> 0 < 1 / c :=
         assume c_pos,
-        have c_ne_zero : ne c 0, from ne.symm (st_order.lt_ne c_pos),
-        have ne (1 / c) 0, from one_div_ne_zero c_ne_zero,
+        have c_ne_zero : c != 0, from ne.symm (st_order.lt_ne c_pos),
+        have 1 / c != 0, from one_div_ne_zero c_ne_zero,
         have disj: 1 / c < 0 \/ 0 < 1 / c, from st_order.ne_lt this,
         have left: 1 / c < 0 -> 0 < 1 / c, from
             assume one_div_c_neg,
@@ -116,7 +118,7 @@ namespace st_ordered_field
         assume zero_le_c,
         assume bc_lt_ac,
 
-        have c_ne_zero: ne c 0, from
+        have c_ne_zero: c != 0, from
             assume bad: c = 0,
             have c * b = c * a, by simp [bad, mul_zero],
             absurd this (st_order.lt_ne bc_lt_ac),
