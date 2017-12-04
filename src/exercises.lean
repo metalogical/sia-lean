@@ -271,7 +271,7 @@ section -- 1.9
             sia.microcancellation this,
         sia.delta_nondegenerate this
 
-    example : not (sia.microstable Delta) :=
+    lemma Delta_not_microstable : not (sia.microstable Delta) :=
         assume bad,
         have forall a b : subtype Delta, a.val * b.val = 0, from
             assume a b,
@@ -295,7 +295,19 @@ section -- 1.9
 
     example : not (forall x y : R, x * x + y * y = 0 -> x * x = 0) :=
         assume bad,
-        sorry
+        have sia.microstable Delta, from
+            assume a_sub b_sub,
+            let a := a_sub.val in
+            let a_prop : a * a = 0 := a_sub.property in
+            let b := b_sub.val in
+            let b_prop : b * b = 0 := b_sub.property in
+            have (a + b) * (a + b) + (a - b) * (a - b) = 0, from (calc
+                (a + b) * (a + b) + (a - b) * (a - b)
+                    = (a * a + a * a + b * b + b * b) : by simp [left_distrib, right_distrib]
+                ... = 0 : by simp [a_prop, b_prop]
+            ),
+            bad (a + b) (a - b) this,
+        Delta_not_microstable this
 end
 
 end
