@@ -1,9 +1,9 @@
-import .core
 import .basic
-import .util
 
 section
 parameters {R : Type} [sia R]
+open st_order
+open st_ordered_field
 open sia
 
 @[reducible] private def Delta := Delta R
@@ -38,9 +38,9 @@ section -- 1.1
         iff.intro forwards backwards
 
     example : 0 < (1: R) + 1 := calc
-        0   < 1           : lt_zero_one
+        0   < 1           : lt_zero_one R
         ... = 1 + 0       : eq.symm (add_zero 1)
-        ... < (1 + 1 : R) : lt_add_left lt_zero_one 1
+        ... < (1 + 1 : R) : lt_add_left (lt_zero_one R) 1
 
      example : a < 0 \/ 0 < a -> 0 < a * a :=
          assume either_lt_0_a,
@@ -278,10 +278,10 @@ section -- 1.9
             have a_nilpotent : a.val * a.val = 0, from a.property,
             have b_nilpotent : b.val * b.val = 0, from b.property,
             have sum_nilpotent : (a.val + b.val) * (a.val + b.val) = 0, from bad a b,
-            have ne (2 : R) (0 : R), from ne.symm (sia.lt_ne (calc (0:R)
-                < 1     : sia.lt_zero_one
+            have ne (2 : R) (0 : R), from ne.symm (lt_ne (calc (0:R)
+                < 1     : lt_zero_one R
             ... = 1 + 0 : by simp
-            ... < 1 + 1 : sia.lt_add_left sia.lt_zero_one 1)),
+            ... < 1 + 1 : lt_add_left (lt_zero_one R) 1)),
             (calc a.val * b.val
                 = (a.val * b.val) * 2 / 2 : by rw (mul_div_cancel _ this)
             ... = (a.val * b.val) * (1 + 1) / 2 : by refl

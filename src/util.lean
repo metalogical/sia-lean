@@ -1,5 +1,7 @@
 universe u
 
+notation `exists!` binders `, ` r:(scoped P, exists_unique P) := r
+
 namespace set -- set extensionality
     variable {R : Type u}
 
