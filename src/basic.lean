@@ -8,6 +8,25 @@ section
     @[reducible] private def Delta := Delta R
     @[reducible] private def DeltaT := subtype Delta
 
+    -- Useful properties of Delta
+    lemma neg_delta : forall d: DeltaT, Delta (-d.val) :=
+        assume d, calc -d.val * -d.val
+            = d.val * d.val : by rw [neg_mul_neg]
+        ... = 0 : d.property
+    instance : has_neg DeltaT := { neg := fun d : DeltaT, { val := -d.val, property := neg_delta d } }
+
+    lemma mul_delta : forall d: DeltaT, forall a: R, Delta (d.val * a) :=
+        assume d,
+        assume a,
+        have d.val * d.val = 0, from d.property,
+        show (d.val * a) * (d.val * a) = 0, from calc
+            (d.val * a) * (d.val * a)
+                = d.val * d.val * a * a : by simp
+            ... = 0 * a * a             : by rw this
+            ... = 0                     : by simp [zero_mul]
+    instance : has_mul DeltaT := { mul := fun d e : DeltaT, { val := d.val * e.val, property := mul_delta d e.val } }
+
+    -- Other theorems
     theorem microaffinity : forall f: R -> R, forall x: R, exists! a: R, forall d: DeltaT, f (x + d.val) = f x + a * d.val :=
         assume f: R -> R,
         assume x: R,

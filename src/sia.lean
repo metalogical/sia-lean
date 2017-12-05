@@ -27,5 +27,7 @@ namespace sia
     -- export Delta in terms of sia; type parameter R is explicit because Lean cannot typically infer it
     @[reducible] def Delta (R: Type u) [sia R] := fun r : R, r * r = 0
     @[reducible] def DeltaT (R: Type u) [sia R] := subtype (Delta R)
+
     instance {R : Type u} [sia R] : has_zero (DeltaT R) := (| zDeltaT |)
+    -- instance {R : Type u} [sia R] : has_neg (DeltaT R) := { neg := fun (a : DeltaT R), { val := -a.val, property := sorry } }
 end sia

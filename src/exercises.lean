@@ -126,16 +126,6 @@ section -- 1.6
         have 0 <= d.val /\ d.val <= 0, from delta_near_zero d,
         not_or this.left this.right
 
-    example : forall d: subtype Delta, forall a: R, Delta (d.val * a) :=
-        assume d,
-        assume a,
-        have d.val * d.val = 0, from d.property,
-        show (d.val * a) * (d.val * a) = 0, from calc
-            (d.val * a) * (d.val * a)
-                = d.val * d.val * a * a : by simp
-            ... = 0 * a * a             : by rw this
-            ... = 0                     : by simp [zero_mul]
-
     example : forall d: subtype Delta, forall a: R, 0 < a -> 0 < a + d.val :=
         assume d,
         assume a,
@@ -308,6 +298,39 @@ section -- 1.9
             ),
             bad (a + b) (a - b) this,
         Delta_not_microstable this
+end
+
+section -- 1.10
+    @[reducible] def neighbors (a b : R) := Delta (a - b)
+
+    example : forall a : R, neighbors a a :=
+        assume a,
+        show (a - a) * (a - a) = 0, by rw [sub_self, zero_mul]
+
+    example : forall {a b : R}, neighbors a b -> neighbors b a :=
+        assume a b,
+        assume pf_ab,
+        calc (b - a) * (b - a)
+            = -(b - a) * -(b - a) : by rw [neg_mul_neg]
+        ... = (a - b) * (a - b)   : by simp
+        ... = 0                   : pf_ab
+
+    example : not (forall {a b c : R}, neighbors a b -> neighbors b c -> neighbors a c) :=
+        assume bad,
+        have terrible : sia.microstable Delta, from
+            assume d e,
+            have n_ab : neighbors d.val 0, from
+                calc (d.val - 0) * (d.val - 0)
+                    = d.val * d.val : by simp
+                ... = 0 : d.property,
+            have n_bc : neighbors 0 (-e.val), from
+                calc (0 - -e.val) * (0 - -e.val)
+                    = e.val * e.val : by simp
+                ... = 0 : e.property,
+            calc (d.val + e.val) * (d.val + e.val)
+                = (d.val - -e.val) * (d.val - -e.val) : by rw [sub_neg_eq_add]
+            ... = 0 : bad n_ab n_bc,
+        Delta_not_microstable terrible
 end
 
 end
