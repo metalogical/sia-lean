@@ -333,4 +333,28 @@ section -- 1.10
         Delta_not_microstable terrible
 end
 
+section -- 1.11
+    @[reducible] def continuous (f : R -> R) : Prop := forall x y : R, neighbors x y -> neighbors (f x) (f y)
+
+    def univ (R : Type) : Type := subtype (@set.univ R)
+
+    example : forall (f : R -> R), continuous f :=
+        assume f,
+        show continuous f, from
+            assume x y : R,
+            let d_val := x - y in
+            assume d_Delta : d_val * d_val = 0,
+            let d : DeltaT := { val := d_val, property := d_Delta } in
+            have forall a: R, (forall d: DeltaT, f (y + d.val) = f y + a * d.val) -> neighbors (f x) (f y), from
+                assume a,
+                assume nice,
+                have x = y + d.val, by simp [d_val],
+                have f x = f y + a * d.val, by {rw this, apply nice d},
+                calc (f x - f y) * (f x - f y)
+                    = (a * a) * (d.val * d.val) : by simp [this]
+                ... = (a * a) * 0 : by rw d_Delta
+                ... = 0 : by rw mul_zero,
+            exists.elim (exists_of_exists_unique (microaffinity f y)) this
+end
+
 end

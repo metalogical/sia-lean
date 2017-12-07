@@ -11,4 +11,3 @@ namespace set -- set extensionality
 
     theorem ext {A : set R} {B : set R} (a_eq_b : eq A B) : A = B := funext (fun x, propext (a_eq_b x))
 end set
-
